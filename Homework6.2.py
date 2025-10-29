@@ -4,7 +4,6 @@ from airflow.decorators import task
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 import logging
 
-# 🎯 Airflow default args
 default_args = {
     "owner": "airflow",
     "start_date": datetime(2024, 1, 1),
@@ -23,14 +22,14 @@ with DAG(
     @task
     def join_raw_tables():
         """
-        🧩 Step 1: Join two RAW tables into analytics.session_summary
+         Join two RAW tables into analytics.session_summary
         """
         hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
         conn = hook.get_conn()
         cur = conn.cursor()
 
         try:
-            logging.info("✨ Starting ELT fun join process...")
+            logging.info(" Starting ELT fun join process...")
 
             # Context setup
             cur.execute("USE WAREHOUSE MACKEREL_QUERY_WH;")
@@ -54,7 +53,7 @@ with DAG(
             """)
 
             cur.execute("COMMIT;")
-            logging.info("✅ session_summary successfully created!")
+            logging.info(" session_summary successfully created!")
         except Exception as e:
             cur.execute("ROLLBACK;")
             logging.error(f" ELT join failed: {e}")
@@ -66,7 +65,7 @@ with DAG(
     @task
     def remove_duplicates():
         """
-        🧹 Step 2: Remove duplicate sessionIds (keep the latest ts)
+     : Remove duplicate sessionIds (keep the latest ts)
         """
         hook = SnowflakeHook(snowflake_conn_id="snowflake_conn")
         conn = hook.get_conn()
@@ -98,7 +97,7 @@ with DAG(
             """)
 
             cur.execute("COMMIT;")
-            logging.info("🎉 Duplicate cleanup complete — all sessions are unique now!")
+            logging.info("Duplicate cleanup complete — all sessions are unique now!")
         except Exception as e:
             cur.execute("ROLLBACK;")
             logging.error(f" Duplicate cleanup failed: {e}")
@@ -109,3 +108,4 @@ with DAG(
 
 
     join_raw_tables() >> remove_duplicates()
+
